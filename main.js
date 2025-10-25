@@ -7,18 +7,10 @@ const config = {
   scene: { preload, create, update },
   parent: 'gameContainer',
   scale: {
-    mode: Phaser.Scale.RESIZE,
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: 800,
-    height: 480,
-    min: {
-      width: 320,
-      height: 240
-    },
-    max: {
-      width: 1920,
-      height: 1080
-    }
+    height: 480
   },
   input: {
     activePointers: 3 // Support multi-touch
@@ -644,33 +636,6 @@ function createMobileControls() {
   });
 }
 
-function repositionMobileControls(width, height) {
-  if (!mobileControls.upButton) return;
-  
-  // Calculate responsive positions based on screen dimensions
-  const buttonSize = 100;
-  const margin = 20;
-  
-  // Determine if we're in landscape or portrait
-  const isLandscape = width > height;
-  
-  if (isLandscape) {
-    // Landscape: spread buttons more horizontally
-    mobileControls.upButton.setPosition(margin + buttonSize/2, margin + buttonSize/2);
-    mobileControls.downButton.setPosition(margin + buttonSize/2, margin + buttonSize * 1.5 + 10);
-    mobileControls.rightButton.setPosition(width - margin - buttonSize/2, height - margin - buttonSize * 1.5 - 10);
-    mobileControls.leftButton.setPosition(width - margin - buttonSize/2, height - margin - buttonSize/2);
-  } else {
-    // Portrait: adjust for taller screen
-    mobileControls.upButton.setPosition(margin + buttonSize/2, margin + buttonSize/2);
-    mobileControls.downButton.setPosition(margin + buttonSize/2, margin + buttonSize * 1.5 + 20);
-    mobileControls.rightButton.setPosition(width - margin - buttonSize/2, height - margin - buttonSize * 2 - 30);
-    mobileControls.leftButton.setPosition(width - margin - buttonSize/2, height - margin - buttonSize/2);
-  }
-  
-  console.log(`Mobile controls repositioned for ${isLandscape ? 'landscape' : 'portrait'} mode`);
-}
-
 function createScreenShake(scene, intensity = 5, duration = 200) {
   // Create mild screen shake effect to avoid glitches
   try {
@@ -889,22 +854,6 @@ function create() {
   // Initialize with title screen
   gameState = 'title';
   createTitleScreen.call(this);
-  
-  // Add resize handler for better orientation support
-  this.scale.on('resize', (gameSize, baseSize, displaySize, resolution) => {
-    const width = gameSize.width;
-    const height = gameSize.height;
-    
-    // Adjust camera bounds
-    this.cameras.main.setBounds(0, 0, width, height);
-    
-    // Reposition mobile controls if they exist
-    if (isMobile && mobileControls.upButton) {
-      repositionMobileControls.call(this, width, height);
-    }
-    
-    console.log(`Game resized to: ${width}x${height}`);
-  });
   
   console.log('Game initialized with title screen');
 }
