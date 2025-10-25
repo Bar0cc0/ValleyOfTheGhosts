@@ -4,7 +4,17 @@ const config = {
   height: 480,
   backgroundColor: '#bde0fe',
   physics: { default: 'arcade', arcade: { debug: false } },
-  scene: { preload, create, update }
+  scene: { preload, create, update },
+  parent: 'gameContainer',
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 800,
+    height: 480
+  },
+  input: {
+    activePointers: 3 // Support multi-touch
+  }
 };
 
 let ghost, cursors, trees, snowflakes, scoreText, gameOverText, restartText, snowParticles, avalanches, goldenSnowflakes, scorePopups;
@@ -399,81 +409,86 @@ function startGame() {
 }
 
 function createMobileControls() {
-  // Detect if we're on mobile
-  isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // Detect if we're on mobile or touch device - be more inclusive
+  isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+             ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) ||
+             (window.innerWidth <= 768); // Also treat small screens as mobile
   
-  if (!isMobile) return; // Only create mobile controls on mobile devices
+  // Always create mobile controls for better accessibility
+  console.log('Creating mobile controls - mobile detected:', isMobile);
   
-  // Create semi-transparent control buttons
-  const buttonAlpha = 0.6;
-  const buttonSize = 60;
+  // Create larger, more touch-friendly control buttons
+  const buttonAlpha = 0.7;
+  const buttonSize = 80; // Increased from 60 to 80
   
-  // Up arrow button
+  // Up arrow button - positioned for easy thumb access
   mobileControls.upButton = this.add.graphics()
-    .fillStyle(0x333333, buttonAlpha)
+    .fillStyle(0x444444, buttonAlpha)
     .fillCircle(buttonSize/2, buttonSize/2, buttonSize/2)
-    .setPosition(50, 50)
+    .setPosition(60, 60)
     .setInteractive(new Phaser.Geom.Circle(buttonSize/2, buttonSize/2, buttonSize/2), Phaser.Geom.Circle.Contains)
     .setScrollFactor(0); // Stay fixed on screen
     
   // Add arrow shape for up button
   const upArrow = this.add.graphics()
     .fillStyle(0xffffff)
-    .fillTriangle(30, 15, 15, 35, 45, 35)
-    .setPosition(50, 50)
+    .fillTriangle(buttonSize/2, 15, 20, 50, buttonSize - 20, 50)
+    .setPosition(60, 60)
     .setScrollFactor(0);
     
   // Down arrow button
   mobileControls.downButton = this.add.graphics()
-    .fillStyle(0x333333, buttonAlpha)
+    .fillStyle(0x444444, buttonAlpha)
     .fillCircle(buttonSize/2, buttonSize/2, buttonSize/2)
-    .setPosition(50, 130)
+    .setPosition(60, 160)
     .setInteractive(new Phaser.Geom.Circle(buttonSize/2, buttonSize/2, buttonSize/2), Phaser.Geom.Circle.Contains)
     .setScrollFactor(0);
     
   // Add arrow shape for down button
   const downArrow = this.add.graphics()
     .fillStyle(0xffffff)
-    .fillTriangle(30, 45, 15, 25, 45, 25)
-    .setPosition(50, 130)
+    .fillTriangle(buttonSize/2, 65, 20, 30, buttonSize - 20, 30)
+    .setPosition(60, 160)
     .setScrollFactor(0);
     
-  // Left arrow button
+  // Left arrow button - positioned on right side for easy thumb access
   mobileControls.leftButton = this.add.graphics()
-    .fillStyle(0x333333, buttonAlpha)
+    .fillStyle(0x444444, buttonAlpha)
     .fillCircle(buttonSize/2, buttonSize/2, buttonSize/2)
-    .setPosition(700, 400)
+    .setPosition(680, 380)
     .setInteractive(new Phaser.Geom.Circle(buttonSize/2, buttonSize/2, buttonSize/2), Phaser.Geom.Circle.Contains)
     .setScrollFactor(0);
     
   // Add arrow shape for left button
   const leftArrow = this.add.graphics()
     .fillStyle(0xffffff)
-    .fillTriangle(15, 30, 35, 15, 35, 45)
-    .setPosition(700, 400)
+    .fillTriangle(15, buttonSize/2, 50, 20, 50, buttonSize - 20)
+    .setPosition(680, 380)
     .setScrollFactor(0);
     
   // Right arrow button
   mobileControls.rightButton = this.add.graphics()
-    .fillStyle(0x333333, buttonAlpha)
+    .fillStyle(0x444444, buttonAlpha)
     .fillCircle(buttonSize/2, buttonSize/2, buttonSize/2)
-    .setPosition(700, 320)
+    .setPosition(680, 280)
     .setInteractive(new Phaser.Geom.Circle(buttonSize/2, buttonSize/2, buttonSize/2), Phaser.Geom.Circle.Contains)
     .setScrollFactor(0);
     
   // Add arrow shape for right button
   const rightArrow = this.add.graphics()
     .fillStyle(0xffffff)
-    .fillTriangle(45, 30, 25, 15, 25, 45)
-    .setPosition(700, 320)
+    .fillTriangle(65, buttonSize/2, 30, 20, 30, buttonSize - 20)
+    .setPosition(680, 280)
     .setScrollFactor(0);
     
-  // Add mobile control instructions
-  const mobileInstructions = this.add.text(400, 450, 'Tap buttons to move • Tap screen to restart when game over', {
-    fontSize: '16px',
+  // Add mobile control instructions - larger text
+  const mobileInstructions = this.add.text(400, 450, 'Use buttons to move • Tap to restart when game over', {
+    fontSize: '18px',
     fill: '#FFFFFF',
     fontFamily: 'Arial',
-    align: 'center'
+    align: 'center',
+    stroke: '#000000',
+    strokeThickness: 2
   }).setOrigin(0.5).setScrollFactor(0);
   
   // Button event handlers with visual feedback
